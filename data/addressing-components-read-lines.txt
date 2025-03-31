@@ -1,0 +1,16 @@
+PROMPT:
+Describe how to address individual components of read lines in ABAP using component selectors, ASSIGN statements, and data reference variables
+
+CODE:
+DATA(comp1) = it[ b = 2 ]-c.
+
+READ TABLE it INTO DATA(wa) WITH KEY b = 2.
+DATA(comp2) = wa-c.
+
+READ TABLE it ASSIGNING FIELD-SYMBOL(<fs>) WITH KEY b = 2.
+DATA(comp3) = <fs>-c.
+
+READ TABLE it REFERENCE INTO DATA(dref) WITH KEY b = 2.
+DATA(comp4) = dref->c.
+
+DATA(comp5) = dref->*-c.

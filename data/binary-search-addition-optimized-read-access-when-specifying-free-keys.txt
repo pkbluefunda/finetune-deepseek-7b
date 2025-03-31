@@ -1,0 +1,98 @@
+PROMPT:
+
+
+CODE:
+CLASS zcl_demo_abap DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    INTERFACES if_oo_adt_classrun.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zcl_demo_abap IMPLEMENTATION.
+  METHOD if_oo_adt_classrun~main.
+    "Line type and internal table declarations
+    TYPES: BEGIN OF demo_struc,
+             idx TYPE i,
+             str TYPE string,
+             num TYPE i,
+           END OF demo_struc.
+
+    DATA itab_std1 TYPE STANDARD TABLE OF demo_struc WITH EMPTY KEY.
+    DATA itab_std2 LIKE itab_std1.
+    DATA itab_sec TYPE STANDARD TABLE OF demo_struc
+                 WITH EMPTY KEY
+                 WITH NON-UNIQUE SORTED KEY sk COMPONENTS str num.
+    CONSTANTS: num_of_table_lines TYPE i VALUE 5000,
+               num_of_repetitions TYPE i VALUE 10,
+               num_of_reads TYPE i VALUE 3000.
+
+    DO num_of_table_lines TIMES.
+      INSERT VALUE #( idx = sy-index
+                      str = |INDEX{ sy-index }|
+                      num = sy-index ) INTO TABLE itab_std1.
+    ENDDO.
+    itab_std2 = itab_std1.
+    itab_sec = itab_std1.
+
+    DATA no_binary_search TYPE TABLE OF decfloat34 WITH EMPTY KEY.
+    DATA with_sort_and_binary_search TYPE TABLE OF decfloat34 WITH EMPTY KEY.
+    DATA with_secondary_key TYPE TABLE OF decfloat34 WITH EMPTY KEY.
+
+
+    DO num_of_repetitions TIMES.
+      "---- Reading without the BINARY SEARCH addition ----
+      DATA(ts1) = utclong_current( ).
+      DO num_of_reads TIMES.
+        READ TABLE itab_std1 WITH KEY str = `INDEX` && sy-index num = sy-index TRANSPORTING NO FIELDS.
+      ENDDO.
+      DATA(ts2) = utclong_current( ).
+      cl_abap_utclong=>diff( EXPORTING high     = ts2
+                                       low      = ts1
+                              IMPORTING seconds = DATA(seconds) ).
+      APPEND seconds TO no_binary_search.
+
+      SORT itab_std2 BY str num.
+
+      DO num_of_reads TIMES.
+        READ TABLE itab_std2 WITH KEY str = `INDEX` && sy-index num = sy-index BINARY SEARCH TRANSPORTING NO FIELDS.
+      ENDDO.
+      ts2 = utclong_current( ).
+      cl_abap_utclong=>diff( EXPORTING high     = ts2
+                                       low      = ts1
+                             IMPORTING seconds = seconds ).
+      APPEND seconds TO with_sort_and_binary_search.
+
+      ts1 = utclong_current( ).
+      DO num_of_reads TIMES.
+        READ TABLE itab_sec WITH TABLE KEY sk COMPONENTS str = `INDEX` && sy-index num = sy-index TRANSPORTING NO FIELDS.
+      ENDDO.
+      ts2 = utclong_current( ).
+      cl_abap_utclong=>diff( EXPORTING high     = ts2
+                                       low      = ts1
+                             IMPORTING seconds = seconds ).
+      APPEND seconds TO with_secondary_key.
+    ENDDO.
+
+    SORT no_binary_search ASCENDING BY table_line.
+    SORT with_sort_and_binary_search ASCENDING BY table_line.
+    SORT with_secondary_key ASCENDING BY table_line.
+
+    out->write( |Number of read repetitions: { num_of_repetitions }| ).
+    out->write( |Number of reads per table: { num_of_reads }\n| ).
+    out->write( `Fastest run of reads using READ TABLE with a free key, without the BINARY SEARCH addition:` ).
+    out->write( no_binary_search[ 1 ] ).
+    out->write( repeat( val = `-` occ = 70 ) ).
+    out->write( `Fastest run of reads using SORT, and READ TABLE with a free key, and the BINARY SEARCH addition:` ).
+    out->write( with_sort_and_binary_search[ 1 ] ).
+    out->write( repeat( val = `-` occ = 70 ) ).
+    out->write( `Fastest run of reads using READ TABLE and a secondary table key:` ).
+    out->write( with_secondary_key[ 1 ] ).
+  ENDMETHOD.
+ENDCLASS.

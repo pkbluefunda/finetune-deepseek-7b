@@ -1,0 +1,19 @@
+PROMPT:
+Generate an ABAP code snippet demonstrating the use of the NEW operator for creating anonymous data objects and accessing their components, highlighting dynamic programming and constructor expressions
+
+CODE:
+TYPES: BEGIN OF s,
+          a TYPE c LENGTH 3,
+          b TYPE i,
+        END OF s,
+        tab_type TYPE TABLE OF s WITH EMPTY KEY.
+
+DATA(dref_tab) = NEW tab_type( ( a = 'aaa' b = 1 )
+                               ( a = 'bbb' b = 2 ) ).
+
+DATA(copy_deref_itab) = dref_tab->*.
+DATA(read_line) = dref_tab->*[ 2 ].
+DATA(read_comp) = dref_tab->*[ 1 ]-a.
+dref_tab->*[ 1 ]-a = 'zzz'.
+ASSERT dref_tab->*[ 1 ]-a = 'zzz'.
+INSERT VALUE s( a = 'yyy' b = 3 ) INTO TABLE dref_tab->*.

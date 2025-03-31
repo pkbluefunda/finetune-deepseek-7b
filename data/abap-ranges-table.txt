@@ -1,0 +1,18 @@
+PROMPT:
+Generate a dataset prompt that demonstrates how to use ABAP's ranges table feature for filtering and retrieving internal table data
+
+CODE:
+TYPES int_tab_type TYPE TABLE OF i WITH EMPTY KEY.
+DATA(inttab) = VALUE int_tab_type( FOR x = 1 WHILE x <= 20 ( x ) ).
+
+DATA rangestab TYPE RANGE OF i.
+
+rangestab = VALUE #( sign   = 'I'
+                     option = 'BT' ( low = 1  high = 3 )
+                                   ( low = 6  high = 8 )
+                                   ( low = 12 high = 15 )
+                     option = 'GE' ( low = 18 ) ).
+
+SELECT * FROM @inttab AS tab
+    WHERE table_line IN @rangestab
+    INTO TABLE @DATA(result).

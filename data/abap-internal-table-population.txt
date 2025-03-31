@@ -1,0 +1,14 @@
+PROMPT:
+Demonstrate how to populate an internal table from a database table in ABAP, including examples of using SELECT queries with conditions, inner joins, and subqueries
+
+CODE:
+SELECT comp1, comp2, ...
+  FROM dbtab
+  WHERE comp1 NOT IN ( a, b, c ... )
+  INTO TABLE @DATA(it_subquery_result1).
+
+SELECT comp1, comp2, ...
+  FROM db1
+  WHERE EXISTS ( SELECT 'X' FROM db2
+                 WHERE comp1 = db1~comp1 )
+  INTO TABLE @DATA(it_subquery_result2).

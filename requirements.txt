@@ -1,0 +1,11 @@
+transformers>=4.37.0
+torch>=2.1.0
+datasets>=2.14.0
+accelerate>=0.24.0
+peft>=0.3.0
+tensorboard
+gitpython
+scikit-learn
+pandas
+safetensors~=0.5.3
+trl~=0.16.0

@@ -1,0 +1,9 @@
+PROMPT:
+Explain how to use BDEF derived types in ABAP for creating, updating, and deleting special messenger tables
+
+CODE:
+DATA create_tab TYPE TABLE FOR CREATE entity.
+
+DATA update_tab TYPE TABLE FOR UPDATE entity.
+
+TYPES der_typ TYPE TABLE FOR DELETE entity.
