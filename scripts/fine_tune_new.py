@@ -1,5 +1,5 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, TrainingArguments
-from peft import LoraConfig, prepare_model_for_kbit_training
+from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training
 from trl import SFTTrainer
 from datasets import load_dataset
 import torch
@@ -8,7 +8,7 @@ import os
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 # Model name
-model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
+model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
 
 
 dataset_path = "processed_dataset.jsonl"
@@ -94,4 +94,16 @@ trainer = SFTTrainer(
 # Start training
 trainer.train()
 trainer.save_model(output_dir)
+
+# Once the model is trained, we merge it with LoRA
+
+# Load base model
+model = AutoModelForCausalLM.from_pretrained("deepseek-ai/DeepSeek-R1-Distill-Qwen-7B")
+
+# Merge with LoRA
+model = PeftModel.from_pretrained(model, "./results")
+model = model.merge_and_unload()
+
+# Save merged model
+model.save_pretrained("./merged_model")
 
